@@ -11,8 +11,8 @@ function App() {
       <div className="App">
         <Routes>
           <Route exact path="/" element={<HomePage />} />
-          <Route path="/voter" element={<VoterPage />} />
-          <Route path="/upload-project" element={<UploadProjectPage />} />
+          <Route path="/VoterPage" element={<VoterPage />} />
+          <Route path="/UploadProjectPage" element={<UploadProjectPage />} />
         </Routes>
       </div>
     </Router>

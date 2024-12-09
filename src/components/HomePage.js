@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { connectMetaMask } from './Blockchain'; // Import the MetaMask connection function
 import { useNavigate } from 'react-router-dom'; // We'll use this for navigation
+//import UploadProjectPage from './UploadProjectPage';
 
 const HomePage = () => {
   const [walletConnected, setWalletConnected] = useState(false);
@@ -19,11 +20,11 @@ const HomePage = () => {
   };
 
   const handleVoterClick = () => {
-    navigate('/VoterPage'); // Navigate to the Voter page
+    navigate("/VoterPage"); // Navigate to the Voter page
   };
 
   const handleUploadProjectClick = () => {
-    navigate('/UploadProjectPage'); // Navigate to the Upload Project page
+    navigate("/UploadProjectPage"); // Navigate to the Upload Project page
   };
 
   return (
