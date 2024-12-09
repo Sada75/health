@@ -1,35 +1,209 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ethers } from 'ethers'; // Import ethers.js
 import '../styles/UploadProjectPage.css';
 
 const UploadProjectPage = () => {
-  // State to hold form data
   const [projectName, setProjectName] = useState('');
   const [githubLink, setGithubLink] = useState('');
   const [projectExplanation, setProjectExplanation] = useState('');
   const [youtubeLink, setYoutubeLink] = useState('');
 
-  // useNavigate hook to navigate back to HomePage
   const navigate = useNavigate();
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  // Set up your contract ABI and address (after deploying the contract)
+  const contractAddress = "0xc333b05e362fa894641e423d462a3553d8f66928"; // Replace with your deployed contract address
+  const contractABI = [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "projectName",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "githubLink",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "youtubeLink",
+          "type": "string"
+        }
+      ],
+      "name": "ProjectRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "voter",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newVoteCount",
+          "type": "uint256"
+        }
+      ],
+      "name": "ProjectVoted",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_projectName",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_githubLink",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_youtubeLink",
+          "type": "string"
+        }
+      ],
+      "name": "registerProject",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_user",
+          "type": "address"
+        }
+      ],
+      "name": "voteForProject",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_user",
+          "type": "address"
+        }
+      ],
+      "name": "getProject",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "projectName",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "githubLink",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "youtubeLink",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "votes",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "projects",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "projectName",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "githubLink",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "youtubeLink",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "votes",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ];
+
+  // Function to handle the form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Simple validation for links (GitHub and YouTube)
-    const isGithubValid = /^(https?:\/\/)?(www\.)?github\.com\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+$/.test(githubLink);
-    const isYoutubeValid = youtubeLink ? /^(https?:\/\/)?(www\.)?youtube\.com\/watch\?v=[\w-]+$/.test(youtubeLink) : true;
+    // Connect to MetaMask
+    if (window.ethereum) {
+      const provider = new ethers.BrowserProvider(window.ethereum); // Connect to the browser's Ethereum provider
+      const signer = await provider.getSigner(); // Get the signer (user's wallet)
+      const contract = new ethers.Contract(contractAddress, contractABI, signer); // Connect to the contract
 
-    if (!isGithubValid || !isYoutubeValid) {
-      alert("Please provide valid GitHub and YouTube links.");
-      return;
+      try {
+        // Call the registerProject function on the smart contract with the input values
+        const tx = await contract.registerProject(projectName, githubLink, youtubeLink);
+
+        // Wait for transaction to be mined
+        await tx.wait();
+
+        alert('Project registered successfully!');
+
+        // Navigate back to the homepage
+        navigate('/');
+      } catch (error) {
+        console.error('Error registering project:', error);
+        alert('Error registering project.');
+      }
+    } else {
+      alert('Please install MetaMask!');
     }
-
-    // Here, you can handle saving the data to a server or local storage
-    console.log("Project Data Submitted:", { projectName, githubLink, projectExplanation, youtubeLink });
-
-    // After submission, navigate back to the homepage
-    navigate('/');
   };
 
   return (
