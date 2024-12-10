@@ -10,6 +10,25 @@
 			},
 			{
 				"indexed": false,
+				"internalType": "uint256",
+				"name": "newCreditCount",
+				"type": "uint256"
+			}
+		],
+		"name": "CreditsUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
 				"internalType": "string",
 				"name": "projectName",
 				"type": "string"
@@ -31,95 +50,33 @@
 		"type": "event"
 	},
 	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "voter",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "newVoteCount",
-				"type": "uint256"
-			}
-		],
-		"name": "ProjectVoted",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_projectName",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_githubLink",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_youtubeLink",
-				"type": "string"
-			}
-		],
-		"name": "registerProject",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			}
-		],
-		"name": "voteForProject",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			}
-		],
-		"name": "getProject",
+		"inputs": [],
+		"name": "getAllProjects",
 		"outputs": [
 			{
-				"internalType": "string",
-				"name": "projectName",
-				"type": "string"
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
 			},
 			{
-				"internalType": "string",
-				"name": "githubLink",
-				"type": "string"
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
 			},
 			{
-				"internalType": "string",
-				"name": "youtubeLink",
-				"type": "string"
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
 			},
 			{
-				"internalType": "uint256",
-				"name": "votes",
-				"type": "uint256"
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
 			}
 		],
 		"stateMutability": "view",
@@ -152,8 +109,68 @@
 			},
 			{
 				"internalType": "uint256",
-				"name": "votes",
+				"name": "credits",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_projectName",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_githubLink",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_youtubeLink",
+				"type": "string"
+			}
+		],
+		"name": "registerProject",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_credits",
+				"type": "uint256"
+			}
+		],
+		"name": "updateCredits",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "userAddresses",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
