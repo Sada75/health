@@ -17,7 +17,7 @@ const VoterPage = () => {
       if (window.ethereum) {
         const provider = new BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-        const contractAddress = "0xf8ed5c7a0707c3e827efc200cd321daaceb693eb"; // Replace with your contract address
+        const contractAddress = "0x7e544027A993B5c890a837251fa1FB22864d2664"; // Replace with your contract address
         const contractInstance = new ethers.Contract(
           contractAddress,
           ProjectRegistryABI,
