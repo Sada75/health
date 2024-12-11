@@ -54,29 +54,72 @@
 		"name": "getAllProjects",
 		"outputs": [
 			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "projectName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "githubLink",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "youtubeLink",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "credits",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct ProjectRegistry.Project[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address[]",
-				"name": "",
+				"name": "users",
 				"type": "address[]"
-			},
+			}
+		],
+		"name": "getProjects",
+		"outputs": [
 			{
-				"internalType": "string[]",
+				"components": [
+					{
+						"internalType": "string",
+						"name": "projectName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "githubLink",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "youtubeLink",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "credits",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct ProjectRegistry.Project[]",
 				"name": "",
-				"type": "string[]"
-			},
-			{
-				"internalType": "string[]",
-				"name": "",
-				"type": "string[]"
-			},
-			{
-				"internalType": "string[]",
-				"name": "",
-				"type": "string[]"
-			},
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
+				"type": "tuple[]"
 			}
 		],
 		"stateMutability": "view",

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { BrowserProvider } from "ethers"; // Changed to BrowserProvider
-import { ethers } from "ethers"; // Import ethers
-import ProjectRegistryABI from "../abi/ProjectRegistry.json"; // Import the ABI of your contract
+import { BrowserProvider } from "ethers";
+import { ethers } from "ethers";
+import ProjectRegistryABI from "../abi/ProjectRegistry.json";
 
 const VoterPage = () => {
   const [projects, setProjects] = useState([]);
@@ -15,9 +15,9 @@ const VoterPage = () => {
   useEffect(() => {
     const initializeContract = async () => {
       if (window.ethereum) {
-        const provider = new BrowserProvider(window.ethereum); // Use BrowserProvider
-        const signer = await provider.getSigner(); // Await the signer
-        const contractAddress = "0x374237c9ed91d1fb92715f7bc01cf73511f1e627"; // Replace with your contract address
+        const provider = new BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const contractAddress = "0xf8ed5c7a0707c3e827efc200cd321daaceb693eb"; // Replace with your contract address
         const contractInstance = new ethers.Contract(
           contractAddress,
           ProjectRegistryABI,
@@ -37,15 +37,13 @@ const VoterPage = () => {
     if (!contract) return;
 
     const fetchProjects = async () => {
-      const [addresses, names, githubLinks, youtubeLinks, credits] =
-        await contract.getAllProjects();
+      const allProjects = await contract.getAllProjects();
 
-      const projectList = addresses.map((address, index) => ({
-        address,
-        name: names[index],
-        github: githubLinks[index],
-        youtube: youtubeLinks[index],
-        credits: credits[index].toString(),
+      const projectList = allProjects.map((project) => ({
+        name: project.projectName,
+        github: project.githubLink,
+        youtube: project.youtubeLink,
+        credits: project.credits.toString(),
       }));
 
       setProjects(projectList);
@@ -56,8 +54,9 @@ const VoterPage = () => {
   }, [contract]);
 
   // Handle voting for a project
-  const voteForProject = async (projectAddress) => {
-    const votes = userVotes[projectAddress] || 0;
+  const voteForProject = async (projectIndex) => {
+    const project = projects[projectIndex];
+    const votes = userVotes[project.name] || 0;
     const newVotes = votes + 1;
     const quadraticCredits = Math.pow(newVotes, 2);
 
@@ -70,18 +69,15 @@ const VoterPage = () => {
     // Update local state for user votes and credits
     setUserVotes({
       ...userVotes,
-      [projectAddress]: newVotes,
+      [project.name]: newVotes,
     });
     setUserCredits(userCredits - quadraticCredits);
 
-    // Calculate total credits and send to smart contract
-    const totalCredits =
-      parseInt(projects[currentIndex].credits) + quadraticCredits;
+    const totalCredits = parseInt(project.credits) + quadraticCredits;
 
     try {
-      const tx = await contract.updateCredits(projectAddress, totalCredits);
+      const tx = await contract.updateCredits(projectIndex, totalCredits);
       await tx.wait();
-
       alert("Credits updated successfully!");
 
       // Move to the next project
@@ -92,6 +88,7 @@ const VoterPage = () => {
       }
     } catch (err) {
       console.error("Error updating credits:", err);
+      alert("Transaction failed: " + err.message);
     }
   };
 
@@ -110,7 +107,7 @@ const VoterPage = () => {
       <div key={currentIndex}>
         <h2>{currentProject.name}</h2>
         <p>
-          GitHub:{" "}
+          GitHub: {" "}
           <a
             href={currentProject.github}
             target="_blank"
@@ -120,7 +117,7 @@ const VoterPage = () => {
           </a>
         </p>
         <p>
-          YouTube:{" "}
+          YouTube: {" "}
           <a
             href={currentProject.youtube}
             target="_blank"
@@ -131,7 +128,7 @@ const VoterPage = () => {
         </p>
         <p>Credits: {currentProject.credits}</p>
         <button
-          onClick={() => voteForProject(currentProject.address)}
+          onClick={() => voteForProject(currentIndex)}
           disabled={userCredits <= 0}
         >
           Vote

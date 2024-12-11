@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.21;
 
 contract ProjectRegistry {
     // Struct to store project details
@@ -7,11 +7,14 @@ contract ProjectRegistry {
         string projectName;
         string githubLink;
         string youtubeLink;
-        uint votes;
+        uint credits;
     }
 
     // Mapping to associate a user address with their project
     mapping(address => Project) public projects;
+
+    // Array to store all user addresses
+    address[] public userAddresses;
 
     // Event to notify when a project is registered
     event ProjectRegistered(
@@ -21,50 +24,57 @@ contract ProjectRegistry {
         string youtubeLink
     );
 
+    // Event to notify when credits are updated for a project
+    event CreditsUpdated(address indexed user, uint newCreditCount);
+
     // Function to register or update a project
     function registerProject(
-        string memory _projectName,
-        string memory _githubLink,
-        string memory _youtubeLink
-    ) public {
-        // Ensure the user provides valid inputs
+        string calldata _projectName,
+        string calldata _githubLink,
+        string calldata _youtubeLink
+    ) external {
         require(bytes(_projectName).length > 0, "Project name is required");
         require(bytes(_githubLink).length > 0, "GitHub link is required");
         require(bytes(_youtubeLink).length > 0, "YouTube link is required");
 
-        // Save the project details for the user
+        if (bytes(projects[msg.sender].projectName).length == 0) {
+            userAddresses.push(msg.sender);
+        }
+
         projects[msg.sender] = Project({
             projectName: _projectName,
             githubLink: _githubLink,
             youtubeLink: _youtubeLink,
-            votes: 0
+            credits: 0
         });
 
-        // Emit the event
         emit ProjectRegistered(msg.sender, _projectName, _githubLink, _youtubeLink);
     }
 
-    // Function to vote for a user's project
-    function voteForProject(address _user) public {
-        // Ensure the user being voted for has registered a project
+    // Function to update credits for a project
+    function updateCredits(address _user, uint _credits) external {
         require(bytes(projects[_user].projectName).length > 0, "No project found for the user");
-
-        // Increment the vote count
-        projects[_user].votes += 1;
+        projects[_user].credits = _credits;
+        emit CreditsUpdated(_user, _credits);
     }
 
-    // Function to fetch project details for a user
-    function getProject(address _user)
-        public
-        view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            uint
-        )
-    {
-        Project memory project = projects[_user];
-        return (project.projectName, project.githubLink, project.youtubeLink, project.votes);
+    // Function to fetch projects for given user addresses
+    function getProjects(address[] calldata users) external view returns (Project[] memory) {
+        uint length = users.length;
+        Project[] memory result = new Project[](length);
+        for (uint index = 0; index < length; index++) {
+            result[index] = projects[users[index]];
+        }
+        return result;
+    }
+
+    // Function to fetch all projects
+    function getAllProjects() external view returns (Project[] memory) {
+        uint length = userAddresses.length;
+        Project[] memory result = new Project[](length);
+        for (uint index = 0; index < length; index++) {
+            result[index] = projects[userAddresses[index]];
+        }
+        return result;
     }
 }
