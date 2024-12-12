@@ -10,6 +10,7 @@ const VoterPage = () => {
   const [userVotes, setUserVotes] = useState({}); // Track votes per user per project
   const [loading, setLoading] = useState(true);
   const [contract, setContract] = useState(null);
+  const [voteInput, setVoteInput] = useState(0); // Store user input for votes
 
   // Initialize the contract instance
   useEffect(() => {
@@ -17,7 +18,7 @@ const VoterPage = () => {
       if (window.ethereum) {
         const provider = new BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-        const contractAddress = "0x7e544027A993B5c890a837251fa1FB22864d2664"; // Replace with your contract address
+        const contractAddress = "0x17DEB58730b1A881AA03ACaA3bc99221be39ff9f"; // Replace with your contract address
         const contractInstance = new ethers.Contract(
           contractAddress,
           ProjectRegistryABI,
@@ -36,21 +37,25 @@ const VoterPage = () => {
   useEffect(() => {
     if (!contract) return;
 
-    const fetchProjects = async () => {
-      const allProjects = await contract.getAllProjects();
-
-      const projectList = allProjects.map((project) => ({
-        name: project.projectName,
-        github: project.githubLink,
-        youtube: project.youtubeLink,
-        credits: project.credits.toString(),
-      }));
-
-      setProjects(projectList);
-      setLoading(false);
+    const fetchData = async () => {
+      try {
+        // Fetch all projects
+        const allProjects = await contract.getAllProjects();
+        const projectList = allProjects.map((project) => ({
+          name: project.projectName,
+          github: project.githubLink,
+          youtube: project.youtubeLink,
+          credits: project.credits.toString(),
+          owner: project.owner, // Get the owner address from the struct
+        }));
+        setProjects(projectList);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
-    fetchProjects();
+    fetchData();
   }, [contract]);
 
   // Handle voting for a project
@@ -76,7 +81,8 @@ const VoterPage = () => {
     const totalCredits = parseInt(project.credits) + quadraticCredits;
 
     try {
-      const tx = await contract.updateCredits(projectIndex, totalCredits);
+      // Call the updateCredits function with the project owner's address
+      const tx = await contract.updateCredits(project.owner, totalCredits);
       await tx.wait();
       alert("Credits updated successfully!");
 
@@ -107,7 +113,7 @@ const VoterPage = () => {
       <div key={currentIndex}>
         <h2>{currentProject.name}</h2>
         <p>
-          GitHub: {" "}
+          GitHub:{" "}
           <a
             href={currentProject.github}
             target="_blank"
@@ -117,7 +123,7 @@ const VoterPage = () => {
           </a>
         </p>
         <p>
-          YouTube: {" "}
+          YouTube:{" "}
           <a
             href={currentProject.youtube}
             target="_blank"
@@ -127,13 +133,24 @@ const VoterPage = () => {
           </a>
         </p>
         <p>Credits: {currentProject.credits}</p>
+
+        {/* Input for number of votes */}
+        <input
+          type="number"
+          value={voteInput}
+          onChange={(e) => setVoteInput(Number(e.target.value))}
+          min="1"
+          max={userCredits}
+          placeholder="Enter number of votes"
+        />
         <button
           onClick={() => voteForProject(currentIndex)}
-          disabled={userCredits <= 0}
+          disabled={userCredits <= 0 || voteInput <= 0}
         >
           Vote
         </button>
       </div>
+
       {userCredits <= 0 && <p>You have used all your credits!</p>}
     </div>
   );

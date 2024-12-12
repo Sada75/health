@@ -4,6 +4,7 @@ pragma solidity ^0.8.21;
 contract ProjectRegistry {
     // Struct to store project details
     struct Project {
+        address owner; // Address of the project owner
         string projectName;
         string githubLink;
         string youtubeLink;
@@ -42,6 +43,7 @@ contract ProjectRegistry {
         }
 
         projects[msg.sender] = Project({
+            owner: msg.sender,
             projectName: _projectName,
             githubLink: _githubLink,
             youtubeLink: _youtubeLink,

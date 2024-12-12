@@ -13,7 +13,7 @@ const UploadProjectPage = () => {
   const navigate = useNavigate();
 
   // Set up your contract ABI and address (after deploying the contract)
-  const contractAddress = "0x7e544027A993B5c890a837251fa1FB22864d2664"; // Replace with your deployed contract address
+  const contractAddress = "0x17DEB58730b1A881AA03ACaA3bc99221be39ff9f"; // Replace with your deployed contract address
   
 
   // Function to handle the form submission
