@@ -1,0 +1,127 @@
+/* General Page Layout */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8; /* Soft gray-blue background */
+    margin: 0;
+    padding: 0;
+    color: #333; /* Dark text for readability */
+  }
+  
+  /* Main Container */
+  div {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #ffffff; /* Clean white background for the container */
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Heading */
+  h1 {
+    text-align: center;
+    color: #2a2a2a; /* Dark gray for the main title */
+    font-size: 2.8rem;
+    margin-bottom: 20px;
+  }
+  
+  h2 {
+    color: #3c3c3c; /* Slightly lighter gray for section titles */
+    font-size: 2.2rem;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  /* Project Details */
+  p {
+    font-size: 1.2rem;
+    color: #666; /* Light gray text for general information */
+    line-height: 1.8;
+    margin: 10px 0;
+    text-align: center;
+  }
+  
+  /* GitHub and YouTube Links */
+  a {
+    color: #5a9ef0; /* Soft blue for links */
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+  }
+  
+  a:hover {
+    color: #3d7dbb; /* Darker blue when hovering over links */
+  }
+  
+  /* Credits */
+  p span.credits {
+    font-size: 1.4rem;
+    color: #ff6347; /* Tomato red for the credit count to grab attention */
+    font-weight: bold;
+  }
+  
+  /* Voting Section */
+  input[type="number"] {
+    padding: 12px;
+    font-size: 1.3rem;
+    width: 100%;
+    max-width: 320px;
+    margin: 15px 0;
+    border: 2px solid #d6dbe1; /* Soft light gray border */
+    border-radius: 6px;
+    text-align: center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #f8f9fc; /* Very light background for input fields */
+  }
+  
+  button {
+    padding: 14px 24px;
+    background-color: #5a9ef0; /* Soft blue background for button */
+    color: white;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+    width: 200px;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #3d7dbb; /* Darker blue on hover */
+  }
+  
+  /* Disabled Button */
+  button:disabled {
+    background-color: #cccccc; /* Gray color for disabled buttons */
+    cursor: not-allowed;
+  }
+  
+  /* Credits Section */
+  p.credits {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+  }
+  
+  /* Remaining Credits Warning */
+  p {
+    text-align: center;
+    font-size: 1.3rem;
+    color: #ff6347; /* Tomato red for warning */
+    font-weight: bold;
+  }
+  
+  /* Styling for when user has no credits left */
+  p.no-credits {
+    font-size: 1.3rem;
+    color: #d9534f; /* Red color for no credits left */
+    text-align: center;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  

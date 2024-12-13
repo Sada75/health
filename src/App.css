@@ -1,92 +1,20 @@
-:root {
-  /* Enhanced Color Variables */
-  --accent-color: #4a90e2;
-  --accent-hover: #3a7bd5;
-  --accent-active: #2575fc;
-  --button-gradient: linear-gradient(135deg, #4a90e2, #3a7bd5);
-  --button-hover-gradient: linear-gradient(135deg, #3a7bd5, #2575fc);
-  --background-start: #1e1e2f;
-  --background-end: #2b2b45;
-  --background-hover: linear-gradient(135deg, #2b2b45, #1e1e2f, #2d2d57);
-  --text-color-light: #ffffff;
-  --transition-speed: 0.5s;
-  --border-radius: 20px;
-}
-
+/* Apply transition effect to the background */
 body {
+  background: linear-gradient(45deg, #a8c0ff, #3f2b96); /* Lighter gradient */
+  transition: background 3s ease-in-out;
+  height: 100vh;
   margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, var(--background-start), var(--background-end));
-  transition: background var(--transition-speed) ease-in-out;
-  color: var(--text-color-light);
-  overflow: hidden;
 }
 
-.button {
-  position: relative;
-  padding: 2rem 4.5rem; /* Made larger */
-  background: var(--button-gradient);
-  color: var(--text-color-light);
-  font-size: 1.6rem; /* Increased font size */
-  font-weight: 700;
-  text-decoration: none;
-  border-radius: var(--border-radius);
-  border: none;
-  cursor: pointer;
-  overflow: hidden;
-  transition: 
-    transform var(--transition-speed) ease,
-    box-shadow var(--transition-speed) ease,
-    background var(--transition-speed) ease;
-  box-shadow: 
-    0 8px 16px rgba(74, 144, 226, 0.4),
-    0 5px 10px rgba(74, 144, 226, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
+/* Apply transition effect to other elements (text, links, etc.) */
+h1, p, a {
+  transition: color 3s ease-in-out;  /* Transition for text color */
 }
 
-
-.button::before {
-  content: '';
-  position: absolute;
-  top: -100%;
-  left: 0;
-  width: 100%;
-  height: 200%;
-  background: rgba(255, 255, 255, 0.1);
-  transform: rotate(45deg);
-  transition: all var(--transition-speed) ease;
+body:hover {
+  background: linear-gradient(45deg, #fbc2eb, #a6c1ee); /* Lighter hover gradient */
 }
 
-.button:hover {
-  background: var(--button-hover-gradient);
-  transform: scale(1.1);
-  box-shadow: 
-    0 10px 20px rgba(74, 144, 226, 0.5),
-    0 6px 12px rgba(74, 144, 226, 0.4);
-}
-
-.button:hover::before {
-  top: 100%;
-}
-
-.button:active {
-  background: var(--accent-active);
-  transform: scale(1);
-  box-shadow: 
-    0 4px 8px rgba(74, 144, 226, 0.3),
-    0 2px 4px rgba(74, 144, 226, 0.2);
-}
-
-@media (max-width: 600px) {
-  .button {
-    width: 80%;
-    padding: 1.2rem 2rem;
-    font-size: 1.2rem;
-  }
+body:hover h1, body:hover p, body:hover a {
+  color: #333333;  /* Change text color to dark gray for better visibility */
 }
