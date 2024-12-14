@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
-import { BrowserProvider } from "ethers";
+import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import ProjectRegistryABI from "../abi/ProjectRegistry.json";
+import ProjectRegistryABI from "../abi/ProjectRegistry.json"; // Replace with the correct path to your ABI file
 
 const VoterPage = () => {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState([]); // Store project list
   const [userCredits, setUserCredits] = useState(100); // Track remaining credits for the user
   const [userVotes, setUserVotes] = useState({}); // Track votes per user per project
   const [loading, setLoading] = useState(true);
@@ -15,7 +14,7 @@ const VoterPage = () => {
   useEffect(() => {
     const initializeContract = async () => {
       if (window.ethereum) {
-        const provider = new BrowserProvider(window.ethereum);
+        const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const contractAddress = "0x17DEB58730b1A881AA03ACaA3bc99221be39ff9f"; // Replace with your contract address
         const contractInstance = new ethers.Contract(
@@ -105,53 +104,47 @@ const VoterPage = () => {
   return (
     <div>
       <h1>Project Registry</h1>
+      <p>Total Projects: {projects.length}</p> {/* Added project count */}
       <p>Remaining Credits: {userCredits}</p>
 
-      {/* Display all projects */}
-      <div>
-        {projects.map((project, index) => (
-          <div key={index}>
-            <h2>{project.name}</h2>
-            <p>
-              GitHub:{" "}
-              <a
-                href={project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {project.github}
-              </a>
-            </p>
-            <p>
-              YouTube:{" "}
-              <a
-                href={project.youtube}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {project.youtube}
-              </a>
-            </p>
-            <p>Credits: {project.credits}</p>
+      {/* Render projects dynamically */}
+      {projects.map((project, index) => (
+        <div
+          key={index}
+          style={{ marginBottom: "20px", border: "1px solid #ccc", padding: "10px" }}
+        >
+          <h2>{project.name}</h2>
+          <p>
+            GitHub: {" "}
+            <a href={project.github} target="_blank" rel="noopener noreferrer">
+              {project.github}
+            </a>
+          </p>
+          <p>
+            YouTube: {" "}
+            <a href={project.youtube} target="_blank" rel="noopener noreferrer">
+              {project.youtube}
+            </a>
+          </p>
+          <p>Credits: {project.credits}</p>
 
-            {/* Input for number of votes for each project */}
-            <input
-              type="number"
-              value={voteInputs[index] || 0}
-              onChange={(e) => handleVoteInputChange(index, Number(e.target.value))}
-              min="1"
-              max={userCredits}
-              placeholder="Enter number of votes"
-            />
-            <button
-              onClick={() => voteForProject(index)}
-              disabled={userCredits <= 0 || voteInputs[index] <= 0}
-            >
-              Vote
-            </button>
-          </div>
-        ))}
-      </div>
+          {/* Input for number of votes for each project */}
+          <input
+            type="number"
+            value={voteInputs[index] || 0}
+            onChange={(e) => handleVoteInputChange(index, Number(e.target.value))}
+            min="1"
+            max={userCredits}
+            placeholder="Enter number of votes"
+          />
+          <button
+            onClick={() => voteForProject(index)}
+            disabled={userCredits <= 0 || voteInputs[index] <= 0}
+          >
+            Vote
+          </button>
+        </div>
+      ))}
 
       {userCredits <= 0 && <p>You have used all your credits!</p>}
     </div>
