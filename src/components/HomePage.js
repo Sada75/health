@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { connectMetaMask } from './Blockchain'; // Import the MetaMask connection function
 import { useNavigate } from 'react-router-dom'; // We'll use this for navigation
 //import UploadProjectPage from './UploadProjectPage';
+import "../styles/HomePage.css"
 
 const HomePage = () => {
   const [walletConnected, setWalletConnected] = useState(false);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import ProjectRegistryABI from "../abi/ProjectRegistry.json"; // Replace with the correct path to your ABI file
+import "../styles/VoterPage.css"
 
 const VoterPage = () => {
   const [projects, setProjects] = useState([]); // Store project list
