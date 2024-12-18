@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import fetchReadme from "../utils/githubAPI"; // Import fetchReadme function
+import fetchGitHubData from "../utils/githubAPI"; // Updated to fetch GitHub data including avatar_url
 import ProjectRegistryABI from "../abi/ProjectRegistry.json"; // Replace with the correct path to your ABI file
 
 const VoterPage = () => {
   const [projects, setProjects] = useState([]); // Store project list
-  const [readmeContents, setReadmeContents] = useState({}); // Store README contents for projects
+  const [projectDetails, setProjectDetails] = useState({}); // Store additional details like avatar_url and README
   const [userCredits, setUserCredits] = useState(100); // Track remaining credits for the user
   const [userVotes, setUserVotes] = useState({}); // Track votes per user per project
   const [loading, setLoading] = useState(true);
@@ -45,6 +45,12 @@ const VoterPage = () => {
       margin: "10px 0",
       fontSize: "14px",
       color: "#555",
+    },
+    avatar: {
+      width: "50px",
+      height: "50px",
+      borderRadius: "50%",
+      marginRight: "10px",
     },
     link: {
       color: "#007bff",
@@ -123,16 +129,17 @@ const VoterPage = () => {
         }));
         setProjects(projectList);
 
-        // Fetch README content for each project
-        const readmePromises = projectList.map((project) =>
-          fetchReadme(project.github)
+        // Fetch README content and avatar for each project
+        const projectDetailsPromises = projectList.map((project) =>
+          fetchGitHubData(project.github)
         );
-        const readmes = await Promise.all(readmePromises);
-        const readmeMap = projectList.reduce((acc, project, index) => {
-          acc[project.name] = readmes[index] || "README not available.";
+
+        const detailsArray = await Promise.all(projectDetailsPromises);
+        const detailsMap = projectList.reduce((acc, project, index) => {
+          acc[project.name] = detailsArray[index];
           return acc;
         }, {});
-        setReadmeContents(readmeMap);
+        setProjectDetails(detailsMap);
 
         setLoading(false);
       } catch (error) {
@@ -197,7 +204,16 @@ const VoterPage = () => {
       {/* Render projects dynamically */}
       {projects.map((project, index) => (
         <div key={index} style={styles.projectCard}>
-          <h2 style={styles.projectTitle}>{project.name}</h2>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {projectDetails[project.name]?.avatarUrl && (
+              <img
+                src={projectDetails[project.name].avatarUrl}
+                alt={`${project.name} avatar`}
+                style={styles.avatar}
+              />
+            )}
+            <h2 style={styles.projectTitle}>{project.name}</h2>
+          </div>
           <p style={styles.projectInfo}>
             GitHub:{" "}
             <a
@@ -225,7 +241,7 @@ const VoterPage = () => {
           {/* Display the README content */}
           <div style={styles.readme}>
             <h3>README Content:</h3>
-            <pre>{readmeContents[project.name]}</pre>
+            <pre>{projectDetails[project.name]?.readmeContent || "README not available."}</pre>
           </div>
 
           {/* Input for number of votes for each project */}
@@ -253,7 +269,7 @@ const VoterPage = () => {
       ))}
 
       {userCredits <= 0 && (
-        <p style={styles.credits}>You have used all your credits!</p>
+        <p style={styles.credits}>You have used all your credits.</p>
       )}
     </div>
   );
