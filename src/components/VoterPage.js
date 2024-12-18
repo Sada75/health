@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import fetchReadme from "../utils/githubAPI"; // Import fetchReadme function
 import ProjectRegistryABI from "../abi/ProjectRegistry.json"; // Replace with the correct path to your ABI file
 
 const VoterPage = () => {
   const [projects, setProjects] = useState([]); // Store project list
+  const [readmeContents, setReadmeContents] = useState({}); // Store README contents for projects
   const [userCredits, setUserCredits] = useState(100); // Track remaining credits for the user
   const [userVotes, setUserVotes] = useState({}); // Track votes per user per project
   const [loading, setLoading] = useState(true);
@@ -73,6 +75,14 @@ const VoterPage = () => {
       fontWeight: "bold",
       color: "#ff5733",
     },
+    readme: {
+      marginTop: "10px",
+      padding: "10px",
+      backgroundColor: "#f1f1f1",
+      borderRadius: "5px",
+      overflowX: "auto",
+      fontFamily: "monospace",
+    },
   };
 
   // Initialize the contract instance
@@ -112,6 +122,18 @@ const VoterPage = () => {
           owner: project.owner, // Get the owner address from the struct
         }));
         setProjects(projectList);
+
+        // Fetch README content for each project
+        const readmePromises = projectList.map((project) =>
+          fetchReadme(project.github)
+        );
+        const readmes = await Promise.all(readmePromises);
+        const readmeMap = projectList.reduce((acc, project, index) => {
+          acc[project.name] = readmes[index] || "README not available.";
+          return acc;
+        }, {});
+        setReadmeContents(readmeMap);
+
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -177,7 +199,7 @@ const VoterPage = () => {
         <div key={index} style={styles.projectCard}>
           <h2 style={styles.projectTitle}>{project.name}</h2>
           <p style={styles.projectInfo}>
-            GitHub: {" "}
+            GitHub:{" "}
             <a
               href={project.github}
               target="_blank"
@@ -188,7 +210,7 @@ const VoterPage = () => {
             </a>
           </p>
           <p style={styles.projectInfo}>
-            YouTube: {" "}
+            YouTube:{" "}
             <a
               href={project.youtube}
               target="_blank"
@@ -199,6 +221,12 @@ const VoterPage = () => {
             </a>
           </p>
           <p style={styles.projectInfo}>Credits: {project.credits}</p>
+
+          {/* Display the README content */}
+          <div style={styles.readme}>
+            <h3>README Content:</h3>
+            <pre>{readmeContents[project.name]}</pre>
+          </div>
 
           {/* Input for number of votes for each project */}
           <input
