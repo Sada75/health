@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import ProjectRegistryABI from "../abi/ProjectRegistry.json"; // Replace with the correct path to your ABI file
-import "../styles/VoterPage.css"
 
 const VoterPage = () => {
   const [projects, setProjects] = useState([]); // Store project list
@@ -11,13 +10,78 @@ const VoterPage = () => {
   const [contract, setContract] = useState(null);
   const [voteInputs, setVoteInputs] = useState({}); // Store vote input for each project
 
+  // Inline styles for the page
+  const styles = {
+    container: {
+      maxWidth: "800px",
+      margin: "0 auto",
+      padding: "20px",
+      fontFamily: "Arial, sans-serif",
+      backgroundColor: "#f7f9fc",
+      borderRadius: "10px",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    },
+    header: {
+      textAlign: "center",
+      marginBottom: "20px",
+      color: "#333",
+    },
+    projectCard: {
+      backgroundColor: "#fff",
+      border: "1px solid #e0e0e0",
+      borderRadius: "8px",
+      padding: "15px",
+      marginBottom: "20px",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+    },
+    projectTitle: {
+      fontSize: "18px",
+      fontWeight: "bold",
+      color: "#007bff",
+    },
+    projectInfo: {
+      margin: "10px 0",
+      fontSize: "14px",
+      color: "#555",
+    },
+    link: {
+      color: "#007bff",
+      textDecoration: "none",
+    },
+    input: {
+      width: "80px",
+      padding: "5px",
+      borderRadius: "4px",
+      border: "1px solid #ccc",
+      marginRight: "10px",
+    },
+    button: {
+      padding: "8px 16px",
+      borderRadius: "4px",
+      backgroundColor: "#28a745",
+      color: "#fff",
+      border: "none",
+      cursor: "pointer",
+      fontWeight: "bold",
+    },
+    disabledButton: {
+      backgroundColor: "#ccc",
+      cursor: "not-allowed",
+    },
+    credits: {
+      marginTop: "10px",
+      fontWeight: "bold",
+      color: "#ff5733",
+    },
+  };
+
   // Initialize the contract instance
   useEffect(() => {
     const initializeContract = async () => {
       if (window.ethereum) {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-        const contractAddress = "0x17DEB58730b1A881AA03ACaA3bc99221be39ff9f"; // Replace with your contract address
+        const contractAddress = "0xceDE3455718E1ac3152dFf01f92c5384B3d1f391"; // Replace with your contract address
         const contractInstance = new ethers.Contract(
           contractAddress,
           ProjectRegistryABI,
@@ -98,48 +162,61 @@ const VoterPage = () => {
     });
   };
 
-  if (loading) return <div>Loading projects...</div>;
+  if (loading) return <div style={styles.header}>Loading projects...</div>;
 
-  if (projects.length === 0) return <div>No projects available!</div>;
+  if (projects.length === 0)
+    return <div style={styles.header}>No projects available!</div>;
 
   return (
-    <div>
-      <h1>Project Registry</h1>
-      <p>Total Projects: {projects.length}</p> {/* Added project count */}
-      <p>Remaining Credits: {userCredits}</p>
+    <div style={styles.container}>
+      <h1 style={styles.header}>Project Registry</h1>
+      <p style={styles.credits}>Remaining Credits: {userCredits}</p>
 
       {/* Render projects dynamically */}
       {projects.map((project, index) => (
-        <div
-          key={index}
-          style={{ marginBottom: "20px", border: "1px solid #ccc", padding: "10px" }}
-        >
-          <h2>{project.name}</h2>
-          <p>
+        <div key={index} style={styles.projectCard}>
+          <h2 style={styles.projectTitle}>{project.name}</h2>
+          <p style={styles.projectInfo}>
             GitHub: {" "}
-            <a href={project.github} target="_blank" rel="noopener noreferrer">
+            <a
+              href={project.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.link}
+            >
               {project.github}
             </a>
           </p>
-          <p>
+          <p style={styles.projectInfo}>
             YouTube: {" "}
-            <a href={project.youtube} target="_blank" rel="noopener noreferrer">
+            <a
+              href={project.youtube}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.link}
+            >
               {project.youtube}
             </a>
           </p>
-          <p>Credits: {project.credits}</p>
+          <p style={styles.projectInfo}>Credits: {project.credits}</p>
 
           {/* Input for number of votes for each project */}
           <input
             type="number"
             value={voteInputs[index] || 0}
             onChange={(e) => handleVoteInputChange(index, Number(e.target.value))}
+            style={styles.input}
             min="1"
             max={userCredits}
-            placeholder="Enter number of votes"
+            placeholder="Votes"
           />
           <button
             onClick={() => voteForProject(index)}
+            style={
+              userCredits <= 0 || voteInputs[index] <= 0
+                ? { ...styles.button, ...styles.disabledButton }
+                : styles.button
+            }
             disabled={userCredits <= 0 || voteInputs[index] <= 0}
           >
             Vote
@@ -147,7 +224,9 @@ const VoterPage = () => {
         </div>
       ))}
 
-      {userCredits <= 0 && <p>You have used all your credits!</p>}
+      {userCredits <= 0 && (
+        <p style={styles.credits}>You have used all your credits!</p>
+      )}
     </div>
   );
 };

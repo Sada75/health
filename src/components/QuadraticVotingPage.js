@@ -11,7 +11,7 @@ const QuadraticVotingPage = () => {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+    <div >
       <h1>What is Quadratic Voting?</h1>
       <p>
         Quadratic Voting (QV) is a voting system that allows individuals to allocate votes based on the strength of their preferences. 
@@ -38,16 +38,7 @@ const QuadraticVotingPage = () => {
 
       <button 
         onClick={goToHomePage}
-        style={{
-          padding: '10px 20px',
-          fontSize: '16px',
-          cursor: 'pointer',
-          backgroundColor: '#4CAF50',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          marginTop: '20px'
-        }}
+        
       >
         Go to Homepage
       </button>
