@@ -3,153 +3,8 @@ import { ethers } from 'ethers';
 
 // Replace these with your contract's details
 const contractAddress = "0xeb86baf5a0cfcd4cbd68e2eb1703ae34adba853e";
-const PatientDoctorPortalABI =[
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "patient",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "doctor",
-				"type": "address"
-			}
-		],
-		"name": "AccessGranted",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "patient",
-				"type": "address"
-			}
-		],
-		"name": "PatientDetailsUpdated",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_doctor",
-				"type": "address"
-			}
-		],
-		"name": "allowDoctorAccess",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getAccessiblePatients",
-		"outputs": [
-			{
-				"components": [
-					{
-						"internalType": "string",
-						"name": "name",
-						"type": "string"
-					},
-					{
-						"internalType": "uint256",
-						"name": "age",
-						"type": "uint256"
-					},
-					{
-						"internalType": "string",
-						"name": "city",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "medicalRecordsLink",
-						"type": "string"
-					},
-					{
-						"internalType": "address[]",
-						"name": "allowedDoctors",
-						"type": "address[]"
-					}
-				],
-				"internalType": "struct PatientDoctorPortal.Patient[]",
-				"name": "",
-				"type": "tuple[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getPatientDetails",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "name",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "age",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "city",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "medicalRecordsLink",
-				"type": "string"
-			},
-			{
-				"internalType": "address[]",
-				"name": "allowedDoctors",
-				"type": "address[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_name",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_age",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "_city",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_medicalRecordsLink",
-				"type": "string"
-			}
-		],
-		"name": "setPatientDetails",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	}
+const PatientDoctorPortalABI = [
+  // Your ABI here
 ];
 
 const DoctorPortal = () => {
@@ -166,9 +21,9 @@ const DoctorPortal = () => {
 
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const accounts = await provider.send('eth_requestAccounts', []); // Request accounts
-      setAccount(accounts[0]); // Set the first account
-      return provider.getSigner(); // Return the signer for the first account
+      const accounts = await provider.send('eth_requestAccounts', []);
+      setAccount(accounts[0]);
+      return provider.getSigner();
     } catch (error) {
       notifyError('Failed to connect to MetaMask!');
       console.error(error);
@@ -208,33 +63,34 @@ const DoctorPortal = () => {
     alert(`Success: ${message}`);
   };
 
-  // UseEffect to fetch patients on component mount
   useEffect(() => {
     fetchAccessiblePatients();
   }, []);
 
   return (
-    <div className="doctor-portal">
-      <header>
-        <h1>Doctor Portal</h1>
-        <p>Connected Account: {account || "Not connected"}</p>
-        <button onClick={connectToMetaMask}>Connect to MetaMask</button>
+    <div style={styles.container}>
+      <header style={styles.header}>
+        <h1 style={styles.title}>Doctor Portal</h1>
+        <p style={styles.accountInfo}>
+          Connected Account: {account || "Not connected"}
+        </p>
+        <button onClick={connectToMetaMask} style={styles.button}>Connect to MetaMask</button>
       </header>
 
       {loading ? (
-        <p>Loading patient data...</p>
+        <p style={styles.loadingText}>Loading patient data...</p>
       ) : patients.length > 0 ? (
-        <div className="patient-list">
-          <h2>Patients Who Granted Access</h2>
+        <div style={styles.patientList}>
+          <h2 style={styles.patientListTitle}>Patients Who Granted Access</h2>
           <ul>
             {patients.map((patient, index) => (
-              <li key={index}>
+              <li key={index} style={styles.patientItem}>
                 <p><strong>Name:</strong> {patient.name}</p>
                 <p><strong>Age:</strong> {patient.age}</p>
                 <p><strong>City:</strong> {patient.city}</p>
                 <p>
-                  <strong>Medical Records:</strong>{" "}
-                  <a href={patient.medicalRecordsLink} target="_blank" rel="noopener noreferrer">
+                  <strong>Medical Records:</strong>
+                  <a href={patient.medicalRecordsLink} target="_blank" rel="noopener noreferrer" style={styles.link}>
                     View Records
                   </a>
                 </p>
@@ -247,6 +103,70 @@ const DoctorPortal = () => {
       )}
     </div>
   );
+};
+
+// Inline styles
+const styles = {
+  container: {
+    fontFamily: 'Arial, sans-serif',
+    padding: '20px',
+    backgroundColor: '#f4f7f6',
+    minHeight: '100vh',
+  },
+  header: {
+    textAlign: 'center',
+    backgroundColor: '#0044cc',
+    color: 'white',
+    padding: '20px',
+    borderRadius: '8px',
+    marginBottom: '20px',
+  },
+  title: {
+    fontSize: '2.5rem',
+    margin: '0',
+  },
+  accountInfo: {
+    fontSize: '1.2rem',
+    margin: '10px 0',
+  },
+  button: {
+    padding: '10px 20px',
+    backgroundColor: '#ff9800',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '1.2rem',
+  },
+  buttonHover: {
+    backgroundColor: '#ff5722',
+  },
+  loadingText: {
+    textAlign: 'center',
+    fontSize: '1.5rem',
+    color: '#888',
+  },
+  patientList: {
+    backgroundColor: '#ffffff',
+    padding: '15px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    marginTop: '20px',
+  },
+  patientListTitle: {
+    fontSize: '1.8rem',
+    marginBottom: '15px',
+    textAlign: 'center',
+    color: '#333',
+  },
+  patientItem: {
+    padding: '10px',
+    borderBottom: '1px solid #ddd',
+  },
+  link: {
+    color: '#0044cc',
+    textDecoration: 'none',
+  },
 };
 
 export default DoctorPortal;

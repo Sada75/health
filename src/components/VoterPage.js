@@ -77,14 +77,6 @@ const contractABI = [
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
-  },
-  {
-    // View function to get accessible patients
-    // ...
-  },
-  {
-    // View function to get patient details
-    // ...
   }
 ];
 
@@ -99,13 +91,12 @@ const VoterPage = () => {
   const notifySuccess = (message) => toast.success(message);
   const notifyError = (message) => toast.error(message);
 
-  // Function to connect to MetaMask using BrowserProvider
   const connectToMetaMask = async () => {
     if (typeof window.ethereum === 'undefined') {
       notifyError("MetaMask is not installed!");
       return null;
     }
-    
+
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
@@ -116,7 +107,6 @@ const VoterPage = () => {
     }
   };
 
-  // Function to set patient details
   const handleSetPatientDetails = async () => {
     const signer = await connectToMetaMask();
     if (!signer) return;
@@ -133,7 +123,6 @@ const VoterPage = () => {
     }
   };
 
-  // Function to allow doctor access
   const handleAllowDoctorAccess = async () => {
     const signer = await connectToMetaMask();
     if (!signer) return;
@@ -150,7 +139,6 @@ const VoterPage = () => {
     }
   };
 
-  // Function to get patient details
   const handleGetPatientDetails = async () => {
     const signer = await connectToMetaMask();
     if (!signer) return;
@@ -174,57 +162,68 @@ const VoterPage = () => {
   };
 
   return (
-    <div className="patient-portal">
-      <h1>Patient Portal</h1>
-      
+    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif", maxWidth: "600px", margin: "0 auto", textAlign: "center" }}>
+      <h1 style={{ color: "#4CAF50" }}>Patient Portal</h1>
+
       {/* Set Patient Details */}
-      <div>
+      <div style={{ marginBottom: "20px" }}>
         <h2>Set Your Details</h2>
         <input
           type="text"
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          style={{ padding: "10px", margin: "5px", width: "80%" }}
         />
         <input
           type="number"
           placeholder="Age"
           value={age}
           onChange={(e) => setAge(e.target.value)}
+          style={{ padding: "10px", margin: "5px", width: "80%" }}
         />
         <input
           type="text"
           placeholder="City"
           value={city}
           onChange={(e) => setCity(e.target.value)}
+          style={{ padding: "10px", margin: "5px", width: "80%" }}
         />
         <input
           type="text"
           placeholder="Medical Records Link"
           value={medicalRecordsLink}
           onChange={(e) => setMedicalRecordsLink(e.target.value)}
+          style={{ padding: "10px", margin: "5px", width: "80%" }}
         />
-        <button onClick={handleSetPatientDetails}>Submit Details</button>
+        <button onClick={handleSetPatientDetails} style={{ padding: "10px 20px", backgroundColor: "#4CAF50", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+          Submit Details
+        </button>
       </div>
 
       {/* Allow Doctor Access */}
-      <div>
+      <div style={{ marginBottom: "20px" }}>
         <h2>Grant Access to Doctor</h2>
         <input
           type="text"
           placeholder="Doctor's MetaMask Address"
           value={doctorAddress}
           onChange={(e) => setDoctorAddress(e.target.value)}
+          style={{ padding: "10px", margin: "5px", width: "80%" }}
         />
-        <button onClick={handleAllowDoctorAccess}>Grant Access</button>
+        <button onClick={handleAllowDoctorAccess} style={{ padding: "10px 20px", backgroundColor: "#4CAF50", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+          Grant Access
+        </button>
       </div>
 
       {/* Get Patient Details */}
-      <div>
+      <div style={{ marginBottom: "20px" }}>
         <h2>View Your Details</h2>
-        <button onClick={handleGetPatientDetails}>Fetch Details</button>
+        <button onClick={handleGetPatientDetails} style={{ padding: "10px 20px", backgroundColor: "#4CAF50", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+          Fetch Details
+        </button>
         {patientDetails && (
-          <div>
+          <div style={{ textAlign: "left", marginTop: "10px" }}>
             <p><strong>Name:</strong> {patientDetails.name}</p>
             <p><strong>Age:</strong> {patientDetails.age}</p>
             <p><strong>City:</strong> {patientDetails.city}</p>
