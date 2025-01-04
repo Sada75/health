@@ -43,10 +43,10 @@ const HomePage = () => {
           {showOptions && (
             <div className="options">
               <button className="option-btn" onClick={handleVoterClick}>
-                Voter
+                Patient Portal
               </button>
               <button className="option-btn" onClick={handleUploadProjectClick}>
-                Upload Project
+                Doctor Portal
               </button>
             </div>
           )}

@@ -32,7 +32,7 @@ const QuadraticVotingPage = () => {
           marginBottom: '20px',
         }}
       >
-        What is Quadratic Voting?
+        Pay 400 and then get the project
       </h1>
       <p 
         style={{
@@ -40,8 +40,7 @@ const QuadraticVotingPage = () => {
           marginBottom: '20px',
         }}
       >
-        Quadratic Voting (QV) is a voting system that allows individuals to allocate votes based on the strength of their preferences. 
-        It is designed to reflect the intensity of voters' feelings, not just the number of people who support a particular option.
+        Kushal Bhadwe
       </p>
       
       <h2 
@@ -51,7 +50,7 @@ const QuadraticVotingPage = () => {
           marginBottom: '15px',
         }}
       >
-        How does it work?
+        
       </h2>
       <p 
         style={{
@@ -59,9 +58,9 @@ const QuadraticVotingPage = () => {
           marginBottom: '20px',
         }}
       >
-        In Quadratic Voting, each voter is given a certain number of credits or "votes." 
+        {/* In Quadratic Voting, each voter is given a certain number of credits or "votes." 
         The more votes you want to cast on a single issue, the more costly it becomes. 
-        The cost is determined by the square of the number of votes you wish to cast.
+        The cost is determined by the square of the number of votes you wish to cast. */}
       </p>
       
       <h3 
@@ -71,7 +70,7 @@ const QuadraticVotingPage = () => {
           marginBottom: '15px',
         }}
       >
-        Example:
+        {/* Example: */}
       </h3>
       <p 
         style={{
@@ -79,9 +78,9 @@ const QuadraticVotingPage = () => {
           marginBottom: '20px',
         }}
       >
-        If you want to cast 1 vote, it costs you 1 credit. 
+        {/* If you want to cast 1 vote, it costs you 1 credit. 
         If you want to cast 2 votes, it will cost you 4 credits (2²). 
-        3 votes will cost 9 credits (3²), and so on.
+        3 votes will cost 9 credits (3²), and so on. */}
       </p>
       
       <p 
@@ -90,10 +89,10 @@ const QuadraticVotingPage = () => {
           marginBottom: '30px',
         }}
       >
-        This method helps to prevent individuals or groups from overwhelming the voting system with many votes, ensuring that each vote is a more thoughtful and meaningful expression of preference.
+        {/* This method helps to prevent individuals or groups from overwhelming the voting system with many votes, ensuring that each vote is a more thoughtful and meaningful expression of preference. */}
       </p>
 
-      <button 
+      {/* <button 
         onClick={goToHomePage}
         style={{
           display: 'block',
@@ -111,7 +110,7 @@ const QuadraticVotingPage = () => {
         onMouseOut={(e) => e.target.style.backgroundColor = '#1abc9c'}
       >
         Understood
-      </button>
+      </button> */}
     </div>
   );
 };
