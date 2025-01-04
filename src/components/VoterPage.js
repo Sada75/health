@@ -1,276 +1,240 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ethers } from "ethers";
-import fetchGitHubData from "../utils/githubAPI"; // Updated to fetch GitHub data including avatar_url
-import ProjectRegistryABI from "../abi/ProjectRegistry.json"; // Replace with the correct path to your ABI file
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+const contractAddress = "0xeb86baf5a0cfcd4cbd68e2eb1703ae34adba853e"; // Replace with your deployed contract address
+const contractABI = [
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "patient",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "doctor",
+        "type": "address"
+      }
+    ],
+    "name": "AccessGranted",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_doctor",
+        "type": "address"
+      }
+    ],
+    "name": "allowDoctorAccess",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "patient",
+        "type": "address"
+      }
+    ],
+    "name": "PatientDetailsUpdated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_age",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_city",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_medicalRecordsLink",
+        "type": "string"
+      }
+    ],
+    "name": "setPatientDetails",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    // View function to get accessible patients
+    // ...
+  },
+  {
+    // View function to get patient details
+    // ...
+  }
+];
 
 const VoterPage = () => {
-  const [projects, setProjects] = useState([]); // Store project list
-  const [projectDetails, setProjectDetails] = useState({}); // Store additional details like avatar_url and README
-  const [userCredits, setUserCredits] = useState(100); // Track remaining credits for the user
-  const [userVotes, setUserVotes] = useState({}); // Track votes per user per project
-  const [loading, setLoading] = useState(true);
-  const [contract, setContract] = useState(null);
-  const [voteInputs, setVoteInputs] = useState({}); // Store vote input for each project
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [city, setCity] = useState("");
+  const [medicalRecordsLink, setMedicalRecordsLink] = useState("");
+  const [doctorAddress, setDoctorAddress] = useState("");
+  const [patientDetails, setPatientDetails] = useState(null);
 
-  // Inline styles for the page
-  const styles = {
-    container: {
-      maxWidth: "800px",
-      margin: "0 auto",
-      padding: "20px",
-      fontFamily: "Arial, sans-serif",
-      backgroundColor: "#f7f9fc",
-      borderRadius: "10px",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    },
-    header: {
-      textAlign: "center",
-      marginBottom: "20px",
-      color: "#333",
-    },
-    projectCard: {
-      backgroundColor: "#fff",
-      border: "1px solid #e0e0e0",
-      borderRadius: "8px",
-      padding: "15px",
-      marginBottom: "20px",
-      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-    },
-    projectTitle: {
-      fontSize: "18px",
-      fontWeight: "bold",
-      color: "#007bff",
-    },
-    projectInfo: {
-      margin: "10px 0",
-      fontSize: "14px",
-      color: "#555",
-    },
-    avatar: {
-      width: "50px",
-      height: "50px",
-      borderRadius: "50%",
-      marginRight: "10px",
-    },
-    link: {
-      color: "#007bff",
-      textDecoration: "none",
-    },
-    input: {
-      width: "80px",
-      padding: "5px",
-      borderRadius: "4px",
-      border: "1px solid #ccc",
-      marginRight: "10px",
-    },
-    button: {
-      padding: "8px 16px",
-      borderRadius: "4px",
-      backgroundColor: "#28a745",
-      color: "#fff",
-      border: "none",
-      cursor: "pointer",
-      fontWeight: "bold",
-    },
-    disabledButton: {
-      backgroundColor: "#ccc",
-      cursor: "not-allowed",
-    },
-    credits: {
-      marginTop: "10px",
-      fontWeight: "bold",
-      color: "#ff5733",
-    },
-    readme: {
-      marginTop: "10px",
-      padding: "10px",
-      backgroundColor: "#f1f1f1",
-      borderRadius: "5px",
-      overflowX: "auto",
-      fontFamily: "monospace",
-    },
+  const notifySuccess = (message) => toast.success(message);
+  const notifyError = (message) => toast.error(message);
+
+  // Function to connect to MetaMask using BrowserProvider
+  const connectToMetaMask = async () => {
+    if (typeof window.ethereum === 'undefined') {
+      notifyError("MetaMask is not installed!");
+      return null;
+    }
+    
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      return provider.getSigner();
+    } catch (error) {
+      notifyError("Failed to connect to MetaMask!");
+      console.error(error);
+    }
   };
 
-  // Initialize the contract instance
-  useEffect(() => {
-    const initializeContract = async () => {
-      if (window.ethereum) {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
-        const contractAddress = "0xceDE3455718E1ac3152dFf01f92c5384B3d1f391"; // Replace with your contract address
-        const contractInstance = new ethers.Contract(
-          contractAddress,
-          ProjectRegistryABI,
-          signer
-        );
-        setContract(contractInstance);
-      } else {
-        alert("Please install MetaMask!");
-      }
-    };
+  // Function to set patient details
+  const handleSetPatientDetails = async () => {
+    const signer = await connectToMetaMask();
+    if (!signer) return;
 
-    initializeContract();
-  }, []);
-
-  // Fetch all projects on load
-  useEffect(() => {
-    if (!contract) return;
-
-    const fetchData = async () => {
-      try {
-        // Fetch all projects
-        const allProjects = await contract.getAllProjects();
-        const projectList = allProjects.map((project) => ({
-          name: project.projectName,
-          github: project.githubLink,
-          youtube: project.youtubeLink,
-          credits: project.credits.toString(),
-          owner: project.owner, // Get the owner address from the struct
-        }));
-        setProjects(projectList);
-
-        // Fetch README content and avatar for each project
-        const projectDetailsPromises = projectList.map((project) =>
-          fetchGitHubData(project.github)
-        );
-
-        const detailsArray = await Promise.all(projectDetailsPromises);
-        const detailsMap = projectList.reduce((acc, project, index) => {
-          acc[project.name] = detailsArray[index];
-          return acc;
-        }, {});
-        setProjectDetails(detailsMap);
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, [contract]);
-
-  // Handle voting for a project
-  const voteForProject = async (projectIndex) => {
-    const project = projects[projectIndex];
-    const votes = userVotes[project.name] || 0;
-    const newVotes = votes + 1;
-    const quadraticCredits = Math.pow(newVotes, 2);
-
-    // Check if the user has enough credits left
-    if (quadraticCredits > userCredits) {
-      alert("You don't have enough credits to vote!");
-      return;
-    }
-
-    // Update local state for user votes and credits
-    setUserVotes({
-      ...userVotes,
-      [project.name]: newVotes,
-    });
-    setUserCredits(userCredits - quadraticCredits);
-
-    const totalCredits = parseInt(project.credits) + quadraticCredits;
+    const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
     try {
-      // Call the updateCredits function with the project owner's address
-      const tx = await contract.updateCredits(project.owner, totalCredits);
+      const tx = await contract.setPatientDetails(name, age, city, medicalRecordsLink);
       await tx.wait();
-      alert("Credits updated successfully!");
-    } catch (err) {
-      console.error("Error updating credits:", err);
-      alert("Transaction failed: " + err.message);
+      notifySuccess("Patient details set successfully!");
+    } catch (error) {
+      notifyError("Failed to set patient details!");
+      console.error(error);
     }
   };
 
-  // Handle vote input change
-  const handleVoteInputChange = (index, value) => {
-    setVoteInputs({
-      ...voteInputs,
-      [index]: value,
-    });
+  // Function to allow doctor access
+  const handleAllowDoctorAccess = async () => {
+    const signer = await connectToMetaMask();
+    if (!signer) return;
+
+    const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+    try {
+      const tx = await contract.allowDoctorAccess(doctorAddress);
+      await tx.wait();
+      notifySuccess("Doctor access granted!");
+    } catch (error) {
+      notifyError("Failed to grant doctor access!");
+      console.error(error);
+    }
   };
 
-  if (loading) return <div style={styles.header}>Loading projects...</div>;
+  // Function to get patient details
+  const handleGetPatientDetails = async () => {
+    const signer = await connectToMetaMask();
+    if (!signer) return;
 
-  if (projects.length === 0)
-    return <div style={styles.header}>No projects available!</div>;
+    const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+    try {
+      const details = await contract.getPatientDetails();
+      setPatientDetails({
+        name: details[0],
+        age: details[1].toString(),
+        city: details[2],
+        medicalRecordsLink: details[3],
+        allowedDoctors: details[4],
+      });
+      notifySuccess("Patient details fetched successfully!");
+    } catch (error) {
+      notifyError("Failed to fetch patient details!");
+      console.error(error);
+    }
+  };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.header}>Project Registry</h1>
-      <p style={styles.credits}>Remaining Credits: {userCredits}</p>
+    <div className="patient-portal">
+      <h1>Patient Portal</h1>
+      
+      {/* Set Patient Details */}
+      <div>
+        <h2>Set Your Details</h2>
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Age"
+          value={age}
+          onChange={(e) => setAge(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="City"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Medical Records Link"
+          value={medicalRecordsLink}
+          onChange={(e) => setMedicalRecordsLink(e.target.value)}
+        />
+        <button onClick={handleSetPatientDetails}>Submit Details</button>
+      </div>
 
-      {/* Render projects dynamically */}
-      {projects.map((project, index) => (
-        <div key={index} style={styles.projectCard}>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {projectDetails[project.name]?.avatarUrl && (
-              <img
-                src={projectDetails[project.name].avatarUrl}
-                alt={`${project.name} avatar`}
-                style={styles.avatar}
-              />
-            )}
-            <h2 style={styles.projectTitle}>{project.name}</h2>
+      {/* Allow Doctor Access */}
+      <div>
+        <h2>Grant Access to Doctor</h2>
+        <input
+          type="text"
+          placeholder="Doctor's MetaMask Address"
+          value={doctorAddress}
+          onChange={(e) => setDoctorAddress(e.target.value)}
+        />
+        <button onClick={handleAllowDoctorAccess}>Grant Access</button>
+      </div>
+
+      {/* Get Patient Details */}
+      <div>
+        <h2>View Your Details</h2>
+        <button onClick={handleGetPatientDetails}>Fetch Details</button>
+        {patientDetails && (
+          <div>
+            <p><strong>Name:</strong> {patientDetails.name}</p>
+            <p><strong>Age:</strong> {patientDetails.age}</p>
+            <p><strong>City:</strong> {patientDetails.city}</p>
+            <p><strong>Medical Records Link:</strong> {patientDetails.medicalRecordsLink}</p>
+            <p><strong>Allowed Doctors:</strong> {patientDetails.allowedDoctors.join(", ")}</p>
           </div>
-          <p style={styles.projectInfo}>
-            GitHub:{" "}
-            <a
-              href={project.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={styles.link}
-            >
-              {project.github}
-            </a>
-          </p>
-          <p style={styles.projectInfo}>
-            YouTube:{" "}
-            <a
-              href={project.youtube}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={styles.link}
-            >
-              {project.youtube}
-            </a>
-          </p>
-          <p style={styles.projectInfo}>Credits: {project.credits}</p>
+        )}
+      </div>
 
-          {/* Display the README content */}
-          <div style={styles.readme}>
-            <h3>README Content:</h3>
-            <pre>{projectDetails[project.name]?.readmeContent || "README not available."}</pre>
-          </div>
-
-          {/* Input for number of votes for each project */}
-          <input
-            type="number"
-            value={voteInputs[index] || 0}
-            onChange={(e) => handleVoteInputChange(index, Number(e.target.value))}
-            style={styles.input}
-            min="1"
-            max={userCredits}
-            placeholder="Votes"
-          />
-          <button
-            onClick={() => voteForProject(index)}
-            style={
-              userCredits <= 0 || voteInputs[index] <= 0
-                ? { ...styles.button, ...styles.disabledButton }
-                : styles.button
-            }
-            disabled={userCredits <= 0 || voteInputs[index] <= 0}
-          >
-            Vote
-          </button>
-        </div>
-      ))}
-
-      {userCredits <= 0 && (
-        <p style={styles.credits}>You have used all your credits.</p>
-      )}
+      <ToastContainer />
     </div>
   );
 };

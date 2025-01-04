@@ -1,103 +1,252 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ethers } from 'ethers'; // Import ethers.js
-import '../styles/UploadProjectPage.css';
-import contractABI from "../abi/ProjectRegistry.json"; // Import the ABI of your contract
+import React, { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
 
-const UploadProjectPage = () => {
-  const [projectName, setProjectName] = useState('');
-  const [githubLink, setGithubLink] = useState('');
-  const [projectExplanation, setProjectExplanation] = useState('');
-  const [youtubeLink, setYoutubeLink] = useState('');
+// Replace these with your contract's details
+const contractAddress = "0xeb86baf5a0cfcd4cbd68e2eb1703ae34adba853e";
+const PatientDoctorPortalABI =[
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "patient",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "doctor",
+				"type": "address"
+			}
+		],
+		"name": "AccessGranted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "patient",
+				"type": "address"
+			}
+		],
+		"name": "PatientDetailsUpdated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_doctor",
+				"type": "address"
+			}
+		],
+		"name": "allowDoctorAccess",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAccessiblePatients",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "age",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "city",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "medicalRecordsLink",
+						"type": "string"
+					},
+					{
+						"internalType": "address[]",
+						"name": "allowedDoctors",
+						"type": "address[]"
+					}
+				],
+				"internalType": "struct PatientDoctorPortal.Patient[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPatientDetails",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "age",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "city",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "medicalRecordsLink",
+				"type": "string"
+			},
+			{
+				"internalType": "address[]",
+				"name": "allowedDoctors",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_age",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_city",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_medicalRecordsLink",
+				"type": "string"
+			}
+		],
+		"name": "setPatientDetails",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+];
 
-  const navigate = useNavigate();
+const DoctorPortal = () => {
+  const [account, setAccount] = useState(null);
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Set up your contract ABI and address (after deploying the contract)
-  const contractAddress = "0xceDE3455718E1ac3152dFf01f92c5384B3d1f391"; // Replace with your deployed contract address
-  
+  // Function to connect to MetaMask
+  const connectToMetaMask = async () => {
+    if (typeof window.ethereum === 'undefined') {
+      notifyError('MetaMask is not installed!');
+      return null;
+    }
 
-  // Function to handle the form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Connect to MetaMask
-    if (window.ethereum) {
-      const provider = new ethers.BrowserProvider(window.ethereum); // Connect to the browser's Ethereum provider
-      const signer = await provider.getSigner(); // Get the signer (user's wallet)
-      const contract = new ethers.Contract(contractAddress, contractABI, signer); // Connect to the contract
-
-      try {
-        // Call the registerProject function on the smart contract with the input values
-        const tx = await contract.registerProject(projectName, githubLink, youtubeLink);
-
-        // Wait for transaction to be mined
-        await tx.wait();
-
-        alert('Project registered successfully!');
-
-        // Navigate back to the homepage
-        navigate('/');
-      } catch (error) {
-        console.error('Error registering project:', error);
-        alert('Error registering project.');
-      }
-    } else {
-      alert('Please install MetaMask!');
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const accounts = await provider.send('eth_requestAccounts', []); // Request accounts
+      setAccount(accounts[0]); // Set the first account
+      return provider.getSigner(); // Return the signer for the first account
+    } catch (error) {
+      notifyError('Failed to connect to MetaMask!');
+      console.error(error);
     }
   };
 
+  // Fetch accessible patients for the doctor
+  const fetchAccessiblePatients = async () => {
+    setLoading(true);
+
+    const signer = await connectToMetaMask();
+    if (!signer) {
+      setLoading(false);
+      return;
+    }
+
+    const contract = new ethers.Contract(contractAddress, PatientDoctorPortalABI, signer);
+
+    try {
+      const accessiblePatients = await contract.getAccessiblePatients();
+      setPatients(accessiblePatients);
+      notifySuccess('Patient data loaded successfully!');
+    } catch (error) {
+      notifyError('Failed to fetch patients!');
+      console.error(error);
+    }
+
+    setLoading(false);
+  };
+
+  // Helper functions for notifications
+  const notifyError = (message) => {
+    alert(`Error: ${message}`);
+  };
+
+  const notifySuccess = (message) => {
+    alert(`Success: ${message}`);
+  };
+
+  // UseEffect to fetch patients on component mount
+  useEffect(() => {
+    fetchAccessiblePatients();
+  }, []);
+
   return (
-    <div className="upload-project-page">
-      <h2>Upload Your Project</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="projectName">Project Name:</label>
-          <input
-            type="text"
-            id="projectName"
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
-            required
-          />
-        </div>
+    <div className="doctor-portal">
+      <header>
+        <h1>Doctor Portal</h1>
+        <p>Connected Account: {account || "Not connected"}</p>
+        <button onClick={connectToMetaMask}>Connect to MetaMask</button>
+      </header>
 
-        <div>
-          <label htmlFor="githubLink">GitHub Link:</label>
-          <input
-            type="url"
-            id="githubLink"
-            value={githubLink}
-            onChange={(e) => setGithubLink(e.target.value)}
-            required
-          />
+      {loading ? (
+        <p>Loading patient data...</p>
+      ) : patients.length > 0 ? (
+        <div className="patient-list">
+          <h2>Patients Who Granted Access</h2>
+          <ul>
+            {patients.map((patient, index) => (
+              <li key={index}>
+                <p><strong>Name:</strong> {patient.name}</p>
+                <p><strong>Age:</strong> {patient.age}</p>
+                <p><strong>City:</strong> {patient.city}</p>
+                <p>
+                  <strong>Medical Records:</strong>{" "}
+                  <a href={patient.medicalRecordsLink} target="_blank" rel="noopener noreferrer">
+                    View Records
+                  </a>
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
-
-        <div>
-          <label htmlFor="projectExplanation">Project Explanation:</label>
-          <textarea
-            id="projectExplanation"
-            value={projectExplanation}
-            onChange={(e) => setProjectExplanation(e.target.value)}
-            required
-          ></textarea>
-        </div>
-
-        <div>
-          <label htmlFor="youtubeLink">YouTube Link (Project Demo):</label>
-          <input
-            type="url"
-            id="youtubeLink"
-            value={youtubeLink}
-            onChange={(e) => setYoutubeLink(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <button type="submit">Submit Project</button>
-        </div>
-      </form>
+      ) : (
+        <p>No patients have granted access yet.</p>
+      )}
     </div>
   );
 };
 
-export default UploadProjectPage;
+export default DoctorPortal;

@@ -1,21 +1,21 @@
-const main = async() => {
-    const ProjectRegistry = await hre.ethers.getContractFactory("ProjectRegistry");
-    const projectRegistry = await ProjectRegistry.deploy();
+const hre = require("hardhat");
 
-    // await projectRegistry.deployed();
+async function main() {
+  // Get the contract factory
+  const PatientDoctorPortal = await hre.ethers.getContractFactory("PatientDoctorPortal");
+  
+  // Deploy the contract
+  const patientDoctorPortal = await PatientDoctorPortal.deploy();
 
-    console.log("ProjectRegistry deployed to :", projectRegistry.address);
+  // Wait for the contract to be deployed
+  await patientDoctorPortal.deployed();
 
+  console.log("PatientDoctorPortal deployed to:", patientDoctorPortal.address);
 }
 
-const runMain = async() => {
-    try {
-        await main();
-        process.exit(0);
-    }catch(error){
-        console.error(error);
-        process.exit(1);
-    }
-}
-
-runMain();
+// We recommend this pattern to be able to use async/await everywhere
+// and properly handle errors.
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

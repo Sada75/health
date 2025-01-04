@@ -1,82 +1,81 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.0;
 
-contract ProjectRegistry {
-    // Struct to store project details
-    struct Project {
-        address owner; // Address of the project owner
-        string projectName;
-        string githubLink;
-        string youtubeLink;
-        uint credits;
+contract PatientDoctorPortal {
+    
+    // Structure to hold patient details
+    struct Patient {
+        string name;
+        uint age;
+        string city;
+        string medicalRecordsLink;
+        address[] allowedDoctors;
     }
 
-    // Mapping to associate a user address with their project
-    mapping(address => Project) public projects;
+    // Mapping of patient address to their details
+    mapping(address => Patient) private patients;
 
-    // Array to store all user addresses
-    address[] public userAddresses;
+    // Mapping of doctor address to patients who granted access
+    mapping(address => address[]) private doctorAccessList;
 
-    // Event to notify when a project is registered
-    event ProjectRegistered(
-        address indexed user,
-        string projectName,
-        string githubLink,
-        string youtubeLink
-    );
+    // Event emitted when a patient allows a doctor to access their records
+    event AccessGranted(address indexed patient, address indexed doctor);
 
-    // Event to notify when credits are updated for a project
-    event CreditsUpdated(address indexed user, uint newCreditCount);
+    // Event emitted when a patient updates their details
+    event PatientDetailsUpdated(address indexed patient);
 
-    // Function to register or update a project
-    function registerProject(
-        string calldata _projectName,
-        string calldata _githubLink,
-        string calldata _youtubeLink
-    ) external {
-        require(bytes(_projectName).length > 0, "Project name is required");
-        require(bytes(_githubLink).length > 0, "GitHub link is required");
-        require(bytes(_youtubeLink).length > 0, "YouTube link is required");
-
-        if (bytes(projects[msg.sender].projectName).length == 0) {
-            userAddresses.push(msg.sender);
-        }
-
-        projects[msg.sender] = Project({
-            owner: msg.sender,
-            projectName: _projectName,
-            githubLink: _githubLink,
-            youtubeLink: _youtubeLink,
-            credits: 0
+    // Function for a patient to input their details
+    function setPatientDetails(
+        string memory _name,
+        uint _age,
+        string memory _city,
+        string memory _medicalRecordsLink
+    ) public {
+        patients[msg.sender] = Patient({
+            name: _name,
+            age: _age,
+            city: _city,
+            medicalRecordsLink: _medicalRecordsLink,
+            allowedDoctors: new address[](0)
         });
-
-        emit ProjectRegistered(msg.sender, _projectName, _githubLink, _youtubeLink);
+        emit PatientDetailsUpdated(msg.sender);
     }
 
-    // Function to update credits for a project
-    function updateCredits(address _user, uint _credits) external {
-        require(bytes(projects[_user].projectName).length > 0, "No project found for the user");
-        projects[_user].credits = _credits;
-        emit CreditsUpdated(_user, _credits);
+    // Function for a patient to allow a doctor access to their records
+    function allowDoctorAccess(address _doctor) public {
+        require(bytes(patients[msg.sender].name).length > 0, "Patient details not found.");
+        patients[msg.sender].allowedDoctors.push(_doctor);
+        doctorAccessList[_doctor].push(msg.sender);
+        emit AccessGranted(msg.sender, _doctor);
     }
 
-    // Function to fetch projects for given user addresses
-    function getProjects(address[] calldata users) external view returns (Project[] memory) {
-        uint length = users.length;
-        Project[] memory result = new Project[](length);
-        for (uint index = 0; index < length; index++) {
-            result[index] = projects[users[index]];
+    // Function for a doctor to view details of all patients who granted access
+    function getAccessiblePatients() public view returns (Patient[] memory) {
+        address[] memory patientAddresses = doctorAccessList[msg.sender];
+        Patient[] memory accessiblePatients = new Patient[](patientAddresses.length);
+
+        for (uint i = 0; i < patientAddresses.length; i++) {
+            accessiblePatients[i] = patients[patientAddresses[i]];
         }
-        return result;
+        return accessiblePatients;
     }
 
-    // Function to fetch all projects
-    function getAllProjects() external view returns (Project[] memory) {
-        uint length = userAddresses.length;
-        Project[] memory result = new Project[](length);
-        for (uint index = 0; index < length; index++) {
-            result[index] = projects[userAddresses[index]];
-        }
-        return result;
+    // Function for a patient to get their own details
+    function getPatientDetails() public view returns (
+        string memory name,
+        uint age,
+        string memory city,
+        string memory medicalRecordsLink,
+        address[] memory allowedDoctors
+    ) {
+        Patient memory patient = patients[msg.sender];
+        require(bytes(patient.name).length > 0, "Patient details not found.");
+        return (
+            patient.name,
+            patient.age,
+            patient.city,
+            patient.medicalRecordsLink,
+            patient.allowedDoctors
+        );
     }
 }
