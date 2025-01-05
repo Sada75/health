@@ -92,7 +92,7 @@ const QuadraticVotingPage = () => {
         {/* This method helps to prevent individuals or groups from overwhelming the voting system with many votes, ensuring that each vote is a more thoughtful and meaningful expression of preference. */}
       </p>
 
-      {/* <button 
+      <button 
         onClick={goToHomePage}
         style={{
           display: 'block',
@@ -110,7 +110,7 @@ const QuadraticVotingPage = () => {
         onMouseOut={(e) => e.target.style.backgroundColor = '#1abc9c'}
       >
         Understood
-      </button> */}
+      </button>
     </div>
   );
 };
